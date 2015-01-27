@@ -25,7 +25,7 @@ public class GameClient extends Thread {
         this.game = game;
         try {
             this.socket = new DatagramSocket();
-            this.ipAddress = InetAddress.getByName(ipAddress);
+            this.ipAddress = InetAddress.getByName(ipAddress); // This is where you input the ipAddress(Use 'internal ip' if you want lan)
         } catch (SocketException e) {
             e.printStackTrace();
         } catch (UnknownHostException e) {
