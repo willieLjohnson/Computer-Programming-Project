@@ -16,6 +16,7 @@ public class Player extends Mob {
     protected boolean isSwimming = false;
     private int tickCount = 0;
     private String username;
+    int sprintSp = 1;
 
     public Player(Level level, int x, int y, InputHandler input, String username) {
         super(level, "Player", x, y, 1);
@@ -26,19 +27,28 @@ public class Player extends Mob {
     public void tick() {
         int xa = 0;
         int ya = 0;
+        
         if (input != null) {
-            if (input.up.isPressed()) {
-                ya--;
+        	if (input.up.isPressed()) {
+                ya -= 1*sprintSp;
             }
             if (input.down.isPressed()) {
-                ya++;
+                ya += 1*sprintSp;
             }
             if (input.left.isPressed()) {
-                xa--;
+                xa -= 1*sprintSp;
             }
             if (input.right.isPressed()) {
-                xa++;
+                xa += 1 *sprintSp;
             }
+            
+            if (input.sprint.isPressed()) {
+                sprintSp =2;
+            } else {
+            	sprintSp = 1;
+            }
+            
+            
         }
         if (xa != 0 || ya != 0) {
             move(xa, ya);
@@ -62,7 +72,7 @@ public class Player extends Mob {
     public void render(Screen screen) {
         int xTile = 0;
         int yTile = 28;
-        int walkingSpeed = 4;
+        int walkingSpeed = 4/sprintSp;
         int flipTop = (numSteps >> walkingSpeed) & 1;
         int flipBottom = (numSteps >> walkingSpeed) & 1;
 
