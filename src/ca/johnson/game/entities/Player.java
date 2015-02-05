@@ -17,6 +17,10 @@ public class Player extends Mob {
     private int tickCount = 0;
     private String username;
     int sprintSp = 1;
+    private int maxhealth = 10;
+    protected boolean isdead = false;
+   private int currentHealth = 10;
+    private int i= 2;
 
     public Player(Level level, int x, int y, InputHandler input, String username) {
         super(level, "Player", x, y, 1);
@@ -117,6 +121,16 @@ public class Player extends Mob {
             Font.render(username, screen, xOffset - ((username.length() - 1) / 2 * 8), yOffset - 10,
                     Colours.get(-1, -1, -1, 555), 1);
         }
+    
+    
+        //health AND DEATH
+        if (currentHealth <= 0) {
+        	
+        	isdead = true;
+            if (isdead && i <= 2 ){ System.out.println("you are dead"); i++;}
+        	} else {isdead =false; }       	
+        	
+    
     }
 
     public boolean hasCollided(int xa, int ya) {
