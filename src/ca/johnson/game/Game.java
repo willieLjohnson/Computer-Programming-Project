@@ -18,7 +18,7 @@ import ca.johnson.game.level.Level;
 import ca.johnson.game.net.GameClient;
 import ca.johnson.game.net.GameServer;
 import ca.johnson.game.net.packets.Packet00Login;
-
+import ca.johnson.game.gfx.Time;
 public class Game extends Canvas implements Runnable {
 
     private static final long serialVersionUID = 1L;
