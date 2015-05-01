@@ -3,9 +3,12 @@ package ca.johnson.game;
 import java.awt.Canvas;
 import java.awt.Dimension;
 import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.image.BufferStrategy;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferInt;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
@@ -18,7 +21,7 @@ import ca.johnson.game.level.Level;
 import ca.johnson.game.net.GameClient;
 import ca.johnson.game.net.GameServer;
 import ca.johnson.game.net.packets.Packet00Login;
-import ca.johnson.game.gfx.Time;
+
 public class Game extends Canvas implements Runnable {
 
     private static final long serialVersionUID = 1L;
@@ -45,6 +48,7 @@ public class Game extends Canvas implements Runnable {
     public InputHandler input;
     public WindowHandler windowHandler;
     public Level level;
+    public static List<Player> players = new ArrayList<Player>();
     public Player player;
 
     public GameClient socketClient;
@@ -69,10 +73,12 @@ public class Game extends Canvas implements Runnable {
         }
         screen = new Screen(WIDTH, HEIGHT, new SpriteSheet("/sprite_sheet.png"));
         input = new InputHandler(this);
-        level = new Level("/levels/large_test_level.png");
+        level = new Level("/levels/main.png");
         player = new PlayerMP(level, 100, 100, input, JOptionPane.showInputDialog(this, "Please enter a username"),
                 null, -1);
         level.addEntity(player);
+        players.add(player);
+        
         if (!isApplet) {
             Packet00Login loginPacket = new Packet00Login(player.getUsername(), player.x, player.y);
             if (socketServer != null) {
@@ -180,8 +186,9 @@ public class Game extends Canvas implements Runnable {
         }
 
         Graphics g = bs.getDrawGraphics();
-        g.drawImage(image, 0, 0, getWidth(), getHeight(), null);
-        g.dispose();
+        Graphics2D g2 = (Graphics2D) g;
+        g2.drawImage(image, 0, 0, getWidth(), getHeight(), null);
+        g2.dispose();
         bs.show();
     }
 

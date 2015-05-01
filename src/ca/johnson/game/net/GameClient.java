@@ -86,6 +86,7 @@ public class GameClient extends Thread {
                 + " has joined the game...");
         PlayerMP player = new PlayerMP(game.level, packet.getX(), packet.getY(), packet.getUsername(), address, port);
         game.level.addEntity(player);
+        Game.players.add(player);
     }
 
     private void handleMove(Packet02Move packet) {
