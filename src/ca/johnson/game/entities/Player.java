@@ -6,14 +6,17 @@ import java.awt.geom.Ellipse2D.Double;
 import ca.johnson.game.Game;
 import ca.johnson.game.InputHandler;
 import ca.johnson.game.gfx.Colours;
+import ca.johnson.game.gfx.DeathTimer;
 import ca.johnson.game.gfx.Font;
 import ca.johnson.game.gfx.Screen;
 import ca.johnson.game.level.Level;
 import ca.johnson.game.math.Geometry;
 import ca.johnson.game.net.packets.Packet02Move;
+
 import java.awt.geom.Point2D;
 import java.sql.Time;
 import java.util.List;
+import java.util.Random;
 
 import javax.management.timer.Timer;
 
@@ -26,9 +29,8 @@ public class Player extends Mob {
 	private int tickCount = 0;
 	private String username;
 	int sprintSp = 1;
-	protected boolean isdead = false;
 	private static int MAX_HEALTH = 100;
-	
+	String DeathMessage = "";
 
 	public Player(Level level, int x, int y, InputHandler input, String username) {
 		super(level, "Player", x, y, 1);
@@ -108,7 +110,8 @@ public class Player extends Mob {
 			isMoving = true;
 
 			Packet02Move packet = new Packet02Move(this.getUsername(), this.x,
-					this.y, this.numSteps, this.isMoving, this.movingDir);
+					this.y, this.numSteps, this.isMoving, this.movingDir,
+					this.isDead);
 			packet.writeData(Game.game.socketClient);
 		} else {
 			isMoving = false;
@@ -123,72 +126,81 @@ public class Player extends Mob {
 	}
 
 	public void render(Screen screen) {
-		int xTile = 0;
-		int yTile = 28;
-		int walkingSpeed = 4 / sprintSp;
-		int flipTop = (numSteps >> walkingSpeed) & 1;
-		int flipBottom = (numSteps >> walkingSpeed) & 1;
+		if (!isDead) {
+			int xTile = 0;
+			int yTile = 28;
+			int walkingSpeed = 4 / sprintSp;
+			int flipTop = (numSteps >> walkingSpeed) & 1;
+			int flipBottom = (numSteps >> walkingSpeed) & 1;
 
-		if (movingDir == 1) {
-			xTile += 2;
-		} else if (movingDir > 1) {
-			xTile += 4 + ((numSteps >> walkingSpeed) & 1) * 2;
-			flipTop = (movingDir - 1) % 2;
-		}
-
-		int modifier = 8 * scale;
-		int xOffset = x - modifier / 2;
-		int yOffset = y - modifier / 2 - 4;
-		if (isSwimming) {
-			int waterColour = 0;
-			yOffset += 4;
-			if (tickCount % 60 < 15) {
-				waterColour = Colours.get(-1, -1, 225, -1);
-			} else if (15 <= tickCount % 60 && tickCount % 60 < 30) {
-				yOffset -= 1;
-				waterColour = Colours.get(-1, 225, 115, -1);
-			} else if (30 <= tickCount % 60 && tickCount % 60 < 45) {
-				waterColour = Colours.get(-1, 115, -1, 225);
-			} else {
-				yOffset -= 1;
-				waterColour = Colours.get(-1, 225, 115, -1);
+			if (movingDir == 1) {
+				xTile += 2;
+			} else if (movingDir > 1) {
+				xTile += 4 + ((numSteps >> walkingSpeed) & 1) * 2;
+				flipTop = (movingDir - 1) % 2;
 			}
-			screen.render(xOffset, yOffset + 3, 0 + 27 * 32, waterColour, 0x00,
-					1);
-			screen.render(xOffset + 8, yOffset + 3, 0 + 27 * 32, waterColour,
-					0x01, 1);
-		}
-		screen.render(xOffset + (modifier * flipTop), yOffset, xTile + yTile
-				* 32, colour, flipTop, scale);
-		screen.render(xOffset + modifier - (modifier * flipTop), yOffset,
-				(xTile + 1) + yTile * 32, colour, flipTop, scale);
 
-		if (!isSwimming) {
-			screen.render(xOffset + (modifier * flipBottom),
-					yOffset + modifier, xTile + (yTile + 1) * 32, colour,
-					flipBottom, scale);
-			screen.render(xOffset + modifier - (modifier * flipBottom), yOffset
-					+ modifier, (xTile + 1) + (yTile + 1) * 32, colour,
-					flipBottom, scale);
-		}
-		if (username != null) {
-			Font.render(username, screen, xOffset
-					- ((username.length() - 1) / 2 * 8), yOffset - 10,
-					Colours.get(-1, -1, -1, 555), 1);
-		}
+			int modifier = 8 * scale;
+			int xOffset = x - modifier / 2;
+			int yOffset = y - modifier / 2 - 4;
+			if (isSwimming) {
+				int waterColour = 0;
+				yOffset += 4;
+				if (tickCount % 60 < 15) {
+					waterColour = Colours.get(-1, -1, 225, -1);
+				} else if (15 <= tickCount % 60 && tickCount % 60 < 30) {
+					yOffset -= 1;
+					waterColour = Colours.get(-1, 225, 115, -1);
+				} else if (30 <= tickCount % 60 && tickCount % 60 < 45) {
+					waterColour = Colours.get(-1, 115, -1, 225);
+				} else {
+					yOffset -= 1;
+					waterColour = Colours.get(-1, 225, 115, -1);
+				}
+				screen.render(xOffset, yOffset + 3, 0 + 27 * 32, waterColour,
+						0x00, 1);
+				screen.render(xOffset + 8, yOffset + 3, 0 + 27 * 32,
+						waterColour, 0x01, 1);
+			}
+			screen.render(xOffset + (modifier * flipTop), yOffset, xTile
+					+ yTile * 32, colour, flipTop, scale);
+			screen.render(xOffset + modifier - (modifier * flipTop), yOffset,
+					(xTile + 1) + yTile * 32, colour, flipTop, scale);
 
-		// // health AND DEATH
-		// if (currentHealth <= 0) {
-		//
-		// isdead = true;
-		// if (isdead && i <= 2) {
-		// System.out.println("you are dead");
-		// i++;
-		// }
-		// } else {
-		// isdead = false;
-		// }
+			if (!isSwimming) {
+				screen.render(xOffset + (modifier * flipBottom), yOffset
+						+ modifier, xTile + (yTile + 1) * 32, colour,
+						flipBottom, scale);
+				screen.render(xOffset + modifier - (modifier * flipBottom),
+						yOffset + modifier, (xTile + 1) + (yTile + 1) * 32,
+						colour, flipBottom, scale);
+			}
+			if (username != null) {
+				Font.render(username, screen, xOffset
+						- ((username.length() - 1) / 2 * 8), yOffset - 10,
+						Colours.get(-1, -1, -1, 555), 1);
+			}
 
+			// // health AND DEATH
+			// if (currentHealth <= 0) {
+			//
+			// isdead = true;
+			// if (isdead && i <= 2) {
+			// System.out.println("you are dead");
+			// i++;
+			// }
+			// } else {
+			// isdead = false;
+			// }
+		} else {
+			int modifier = 2;
+			int xOffset = x - modifier / 2;
+			int yOffset = y - modifier / 2;
+			
+			Font.render(DeathMessage, screen,
+					xOffset - ((DeathMessage.length() - 1) / 2 * 8),
+					yOffset - 10, Colours.get(-1, -1, -1, 555), 1);
+		}
 	}
 
 	public boolean hasCollided(int xa, int ya) {
@@ -227,22 +239,43 @@ public class Player extends Mob {
 		for (Player p : Game.players) {
 			Point2D player = new Point2D.Double(p.x, p.y - 10);
 			System.out.println(player + " " + p.username);
-			System.out.println("X " + blade.getX() + " Y " + blade.getY() + " blade");
+			System.out.println("X " + blade.getX() + " Y " + blade.getY()
+					+ " blade");
 			if (blade.contains(player)) {
 				p.health--;
 				System.out.println(health);
 				System.out.println("A player " + " was hit" + " and now has "
 						+ p.health + " health");
 				if (p.health <= 0) {
-					p.x = 0;
-					p.y = 1006;
-					Packet02Move packet = new Packet02Move(p.getUsername(), p.x,
-							p.y, p.numSteps, p.isMoving, p.movingDir);
-					packet.writeData(Game.game.socketClient);
+					Random rand = new Random();
+					death(rand.nextInt(6));
+					System.out.println(DeathMessage);
+					Thread respawning = new Thread(new DeathTimer(p.username,
+							5000, p));
+					respawning.start();
 					p.health = MAX_HEALTH;
 				}
 			}
 
+		}
+	}
+
+	private String death(int n) {
+		
+		switch (n) {
+		case 0:
+			return "GAH!";
+		case 1:
+			return"OOF!";
+		case 2:
+			return "OUCH!";
+
+		case 3:
+			return "TRAITOR!";
+		case 4:
+			return"RIP!";
+		case 5:
+			return"YOLO!";
 		}
 	}
 }
