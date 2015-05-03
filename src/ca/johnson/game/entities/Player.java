@@ -261,7 +261,7 @@ public class Player extends Mob {
 	}
 
 	private String death(int n) {
-		
+		int msg;
 		switch (n) {
 		case 0:
 			return "GAH!";
@@ -275,7 +275,7 @@ public class Player extends Mob {
 		case 4:
 			return"RIP!";
 		case 5:
-			return"YOLO!";
+			return "YOLO!";
 		}
 	}
 }
