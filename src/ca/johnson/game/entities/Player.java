@@ -8,9 +8,11 @@ import ca.johnson.game.InputHandler;
 import ca.johnson.game.gfx.Colours;
 import ca.johnson.game.gfx.DeathTimer;
 import ca.johnson.game.gfx.Font;
+import ca.johnson.game.gfx.HealthBar;
 import ca.johnson.game.gfx.Screen;
 import ca.johnson.game.level.Level;
 import ca.johnson.game.math.Geometry;
+import ca.johnson.game.net.GameClient;
 import ca.johnson.game.net.packets.Packet02Move;
 
 import java.awt.geom.Point2D;
@@ -29,6 +31,7 @@ public class Player extends Mob {
 	private int tickCount = 0;
 	private String username;
 	int sprintSp = 1;
+	private Screen specialScreen;
 	private static int MAX_HEALTH = 100;
 	String DeathMessage = "";
 
@@ -43,7 +46,7 @@ public class Player extends Mob {
 		int xa = 0;
 		int ya = 0;
 
-		if (input != null) {
+		if (input != null && !isDead) {
 			if (input.up.isPressed()) {
 				ya -= 1 * sprintSp;
 			}
@@ -70,34 +73,22 @@ public class Player extends Mob {
 				case 1: // down
 					Ellipse2D attackRngDown = new Ellipse2D.Double(x - 10, y,
 							20, 20);
-					// System.out.println("Your position" + x + " " + y);
-					// System.out.println("Your blade" + attackRngDown.getX()
-					// + " " + attackRngDown.getY());
 					checkCollision(attackRngDown);
 					break;
 				case 2: // left
 					Ellipse2D attackRngLeft = new Ellipse2D.Double(x - 20,
 							y - 20, 20, 20);
-					// System.out.println("Your position" + x + " " + y);
-					// System.out.println("Your blade" + attackRngLeft.getX()
-					// + " " + attackRngLeft.getY());
 					checkCollision(attackRngLeft);
 					break;
 				case 3: // right
 					Ellipse2D attackRngRight = new Ellipse2D.Double(x, y - 20,
 							20, 20);
-					// System.out.println("Your position" + x + " " + y);
-					// System.out.println("Your blade" + attackRngRight.getX()
-					// + " " + attackRngRight.getY());
+		
 					checkCollision(attackRngRight);
 					break;
 				case 0: // up
 					Ellipse2D attackRngUp = new Ellipse2D.Double(x - 10,
 							y - 40, 20, 20);
-					// System.out.println("Your position" + x + " " + y);
-					// System.out.println("Your blade" + attackRngUp.getX() +
-					// " "
-					// + attackRngUp.getY());
 					checkCollision(attackRngUp);
 					break;
 				}
@@ -179,27 +170,12 @@ public class Player extends Mob {
 				Font.render(username, screen, xOffset
 						- ((username.length() - 1) / 2 * 8), yOffset - 10,
 						Colours.get(-1, -1, -1, 555), 1);
-			}
-
-			// // health AND DEATH
-			// if (currentHealth <= 0) {
-			//
-			// isdead = true;
-			// if (isdead && i <= 2) {
-			// System.out.println("you are dead");
-			// i++;
-			// }
-			// } else {
-			// isdead = false;
-			// }
-		} else {
-			int modifier = 2;
-			int xOffset = x - modifier / 2;
-			int yOffset = y - modifier / 2;
-			
-			Font.render(DeathMessage, screen,
-					xOffset - ((DeathMessage.length() - 1) / 2 * 8),
-					yOffset - 10, Colours.get(-1, -1, -1, 555), 1);
+				
+				
+			} 
+			if (health < 100) 
+				HealthBar.render(health, MAX_HEALTH, screen, xOffset-5, yOffset + 13,
+						Colours.get(-1, -1, -1, 500), 1);
 		}
 	}
 
@@ -239,17 +215,12 @@ public class Player extends Mob {
 		for (Player p : Game.players) {
 			Point2D player = new Point2D.Double(p.x, p.y - 10);
 			System.out.println(player + " " + p.username);
-			System.out.println("X " + blade.getX() + " Y " + blade.getY()
-					+ " blade");
 			if (blade.contains(player)) {
 				p.health--;
 				System.out.println(health);
 				System.out.println("A player " + " was hit" + " and now has "
 						+ p.health + " health");
 				if (p.health <= 0) {
-					Random rand = new Random();
-					death(rand.nextInt(6));
-					System.out.println(DeathMessage);
 					Thread respawning = new Thread(new DeathTimer(p.username,
 							5000, p));
 					respawning.start();
@@ -260,22 +231,4 @@ public class Player extends Mob {
 		}
 	}
 
-	private String death(int n) {
-		int msg;
-		switch (n) {
-		case 0:
-			return "GAH!";
-		case 1:
-			return"OOF!";
-		case 2:
-			return "OUCH!";
-
-		case 3:
-			return "TRAITOR!";
-		case 4:
-			return"RIP!";
-		case 5:
-			return "YOLO!";
-		}
-	}
 }
