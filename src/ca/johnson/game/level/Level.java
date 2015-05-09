@@ -160,7 +160,7 @@ public class Level {
         return index;
     }
 
-    public synchronized void movePlayer(String username, int x, int y, int numSteps, boolean isMoving, int movingDir) {
+    public synchronized void movePlayer(String username, int x, int y, int numSteps, boolean isMoving, int movingDir, boolean isDead) {
         int index = getPlayerMPIndex(username);
         PlayerMP player = (PlayerMP) this.getEntities().get(index);
         player.x = x;
@@ -168,5 +168,6 @@ public class Level {
         player.setMoving(isMoving);
         player.setNumSteps(numSteps);
         player.setMovingDir(movingDir);
+        player.setDead(isDead);
     }
 }

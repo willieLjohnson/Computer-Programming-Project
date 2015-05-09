@@ -11,7 +11,7 @@ public abstract class Tile {
     public static final Tile STONE = new BasicSolidTile(1, 1, 0, Colours.get(-1, 333, -1, -1), 0xFF555555);
     public static final Tile GRASS = new BasicTile(2, 2, 0, Colours.get(-1, 131, 141, -1), 0xFF00FF00);
     public static final Tile WATER = new AnimatedTile(3, new int[][] { { 0, 5 }, { 1, 5 }, { 2, 5 }, { 1, 5 } },
-            Colours.get(-1, 004, 115, -1), 0xFF0000FF, 100);
+            Colours.get(-1, 004, 115, -1), 0xFF0000FF, 500);
     public static final Tile FLOWER = new BasicTile(4, 3, 0, Colours.get(141, 131, 500, 540), 0xFFFFFF00);
     public static final Tile LILLY = new BasicTile(5, 3, 0, Colours.get(-1, 004, 131, 555), 0xFF6600FF);
     protected byte id;

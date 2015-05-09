@@ -9,6 +9,7 @@ public abstract class Mob extends Entity {
 	protected int speed;
 	protected int numSteps = 0;
 	protected boolean isMoving;
+	protected boolean isDead;
 	protected int movingDir = 1;
 	protected int scale = 1;
 	public int pHealth;
@@ -69,6 +70,9 @@ public abstract class Mob extends Entity {
 	public boolean isMoving() {
 		return isMoving;
 	}
+	public boolean isDead() {
+		return isDead;
+	}
 
 	public int getMovingDir() {
 		return movingDir;
@@ -81,9 +85,13 @@ public abstract class Mob extends Entity {
 	public void setMoving(boolean isMoving) {
 		this.isMoving = isMoving;
 	}
+	public void setDead(boolean isDead) {
+		this.isDead = isDead;
+	}
 
 	public void setMovingDir(int movingDir) {
 		this.movingDir = movingDir;
 	}
+	
 
 }
