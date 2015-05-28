@@ -9,6 +9,7 @@ import ca.johnson.game.gfx.Colours;
 import ca.johnson.game.gfx.DeathTimer;
 import ca.johnson.game.gfx.Font;
 import ca.johnson.game.gfx.HealthBar;
+import ca.johnson.game.gfx.Punch;
 import ca.johnson.game.gfx.Screen;
 import ca.johnson.game.level.Level;
 import ca.johnson.game.net.packets.Packet02Move;
@@ -25,6 +26,8 @@ public class Player extends Mob {
 	private static int MAX_HEALTH = 100;
 	String DeathMessage = "";
 	private boolean isPunching = false;
+	private int lastSwing;
+	private int damage = 30;
 
 	public Player(Level level, int x, int y, InputHandler input, String username) {
 		super(level, "Player", x, y, 1);
@@ -53,12 +56,12 @@ public class Player extends Mob {
 
 			if (input.sprint.isPressed()) {
 				sprintSp = 2;
-				System.out.println(input.sprint.getNumTimesPressed());
 			} else {
 				sprintSp = 1;
 			}
 
-			if (input.swing.isPressed() && (tickCount % 60 < 5)) {
+			if (input.swing.isPressed() && (tickCount - lastSwing > 150)) {
+				lastSwing = tickCount;
 				isPunching = true;
 				switch (this.movingDir) {
 				case 1: // down
@@ -128,31 +131,18 @@ public class Player extends Mob {
 			if (isPunching) {
 				switch (this.movingDir) {
 				case 0: //up
-					if (tickCount % 60 < 5) {
-						screen.render(xOffset + 13, yOffset - 5, 0 + 23 * 32,
-								Colours.get(-1, -1, 500, -1), 4, 2);
-					} else if (5 <= tickCount % 60 && tickCount % 60 < 10) {
-						screen.render(xOffset - 5, yOffset -5, 0 + 24 * 32,
-								Colours.get(-1, -1, 500, -1), 4, 2);
-					} else {
-						isPunching = false;
-					}
+					Thread up = new Thread(new Punch(screen, xOffset, yOffset, lastSwing, this, this.movingDir));
+					up.start();
+					isPunching = false;
 					break;
 				case 1: //down
 					break;
 				case 2: //lefts
 					break;
 				case 3: //right
-
-					if (tickCount % 60 < 5) {
-						screen.render(xOffset + 15, yOffset + 13, 0 + 25 * 32,
-								Colours.get(-1, -1, 500, -1), 2, 2);
-					} else if (5 <= tickCount % 60 && tickCount % 60 < 10) {
-						screen.render(xOffset + 15, yOffset - 2, 0 + 26 * 32,
-								Colours.get(-1, -1, 500, -1), 2, 2);
-					} else {
-						isPunching = false;
-					}
+					Thread right = new Thread(new Punch(screen, xOffset, yOffset, lastSwing, this, this.movingDir));
+					right.start();
+					isPunching = false;
 					break;
 				}
 			}
@@ -236,12 +226,9 @@ public class Player extends Mob {
 	private void checkCollision(Ellipse2D blade) {
 		for (Player p : Game.players) {
 			Point2D player = new Point2D.Double(p.x, p.y - 10);
-			System.out.println(player + " " + p.username);
 			if (blade.contains(player)) {
-				p.health--;
-				System.out.println(health);
-				System.out.println("A player " + " was hit" + " and now has "
-						+ p.health + " health");
+				p.health -= damage ;
+				System.out.println(p.health);
 				if (p.health <= 0) {
 					Thread respawning = new Thread(new DeathTimer(p.username,
 							5000, p));

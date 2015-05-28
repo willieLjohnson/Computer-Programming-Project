@@ -6,7 +6,6 @@ public class HealthBar extends Font{
 		int spacer = 0;
         for (int i = 0; i < currentHealth; i++) {
         	int shrinker = maxHealth%(i+1);
-        	System.out.println(shrinker);
         	if(shrinker>30) 
         		spacer++;
                 screen.render(x + spacer, y, 1002, colour, 0x00, scale);
