@@ -140,7 +140,7 @@ public class Player extends Mob {
 					break;
 				case 1: //down
 					break;
-				case 2: //left
+				case 2: //lefts
 					break;
 				case 3: //right
 
