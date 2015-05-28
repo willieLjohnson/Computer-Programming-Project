@@ -20,6 +20,7 @@ public class GameClient extends Thread {
     private InetAddress ipAddress;
     private DatagramSocket socket;
     private Game game;
+    private String school = "10.128.6.180";
 
     public GameClient(Game game, String ipAddress) {
         this.game = game;

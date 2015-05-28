@@ -1,7 +1,7 @@
 package ca.johnson.game.entities;
 
 import java.awt.geom.Ellipse2D;
-import java.awt.geom.Ellipse2D.Double;
+import java.awt.geom.Point2D;
 
 import ca.johnson.game.Game;
 import ca.johnson.game.InputHandler;
@@ -11,29 +11,20 @@ import ca.johnson.game.gfx.Font;
 import ca.johnson.game.gfx.HealthBar;
 import ca.johnson.game.gfx.Screen;
 import ca.johnson.game.level.Level;
-import ca.johnson.game.math.Geometry;
-import ca.johnson.game.net.GameClient;
 import ca.johnson.game.net.packets.Packet02Move;
-
-import java.awt.geom.Point2D;
-import java.sql.Time;
-import java.util.List;
-import java.util.Random;
-
-import javax.management.timer.Timer;
 
 public class Player extends Mob {
 
 	private InputHandler input;
-	private int colour = Colours.get(-1, 111, 145, 543);
+	private int colour = Colours.get(-1, 100, 500, 543);
 	private int scale = 1;
 	protected boolean isSwimming = false;
 	private int tickCount = 0;
 	private String username;
 	int sprintSp = 1;
-	private Screen specialScreen;
 	private static int MAX_HEALTH = 100;
 	String DeathMessage = "";
+	private boolean isPunching = false;
 
 	public Player(Level level, int x, int y, InputHandler input, String username) {
 		super(level, "Player", x, y, 1);
@@ -67,8 +58,8 @@ public class Player extends Mob {
 				sprintSp = 1;
 			}
 
-			if (input.swing.isPressed()) {
-
+			if (input.swing.isPressed() && (tickCount % 60 < 5)) {
+				isPunching = true;
 				switch (this.movingDir) {
 				case 1: // down
 					Ellipse2D attackRngDown = new Ellipse2D.Double(x - 10, y,
@@ -83,7 +74,7 @@ public class Player extends Mob {
 				case 3: // right
 					Ellipse2D attackRngRight = new Ellipse2D.Double(x, y - 20,
 							20, 20);
-		
+
 					checkCollision(attackRngRight);
 					break;
 				case 0: // up
@@ -134,6 +125,37 @@ public class Player extends Mob {
 			int modifier = 8 * scale;
 			int xOffset = x - modifier / 2;
 			int yOffset = y - modifier / 2 - 4;
+			if (isPunching) {
+				switch (this.movingDir) {
+				case 0: //up
+					if (tickCount % 60 < 5) {
+						screen.render(xOffset + 13, yOffset - 5, 0 + 23 * 32,
+								Colours.get(-1, -1, 500, -1), 4, 2);
+					} else if (5 <= tickCount % 60 && tickCount % 60 < 10) {
+						screen.render(xOffset - 5, yOffset -5, 0 + 24 * 32,
+								Colours.get(-1, -1, 500, -1), 4, 2);
+					} else {
+						isPunching = false;
+					}
+					break;
+				case 1: //down
+					break;
+				case 2: //left
+					break;
+				case 3: //right
+
+					if (tickCount % 60 < 5) {
+						screen.render(xOffset + 15, yOffset + 13, 0 + 25 * 32,
+								Colours.get(-1, -1, 500, -1), 2, 2);
+					} else if (5 <= tickCount % 60 && tickCount % 60 < 10) {
+						screen.render(xOffset + 15, yOffset - 2, 0 + 26 * 32,
+								Colours.get(-1, -1, 500, -1), 2, 2);
+					} else {
+						isPunching = false;
+					}
+					break;
+				}
+			}
 			if (isSwimming) {
 				int waterColour = 0;
 				yOffset += 4;
@@ -166,16 +188,16 @@ public class Player extends Mob {
 						yOffset + modifier, (xTile + 1) + (yTile + 1) * 32,
 						colour, flipBottom, scale);
 			}
+			
 			if (username != null) {
 				Font.render(username, screen, xOffset
 						- ((username.length() - 1) / 2 * 8), yOffset - 10,
 						Colours.get(-1, -1, -1, 555), 1);
-				
-				
-			} 
-			if (health < 100) 
-				HealthBar.render(health, MAX_HEALTH, screen, xOffset-5, yOffset + 13,
-						Colours.get(-1, -1, -1, 500), 1);
+
+			}
+			if (health < 100)
+				HealthBar.render(health, MAX_HEALTH, screen, xOffset - 5,
+						yOffset + 13, Colours.get(-1, -1, -1, 500), 1);
 		}
 	}
 

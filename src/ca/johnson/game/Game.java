@@ -16,6 +16,7 @@ import javax.swing.JOptionPane;
 import ca.johnson.game.entities.Player;
 import ca.johnson.game.entities.PlayerMP;
 import ca.johnson.game.gfx.Screen;
+import ca.johnson.game.gfx.Sound;
 import ca.johnson.game.gfx.SpriteSheet;
 import ca.johnson.game.level.Level;
 import ca.johnson.game.net.GameClient;
@@ -54,7 +55,7 @@ public class Game extends Canvas implements Runnable {
     public GameClient socketClient;
     public GameServer socketServer;
 
-    public boolean debug = true;
+    public boolean debug = false;
     public boolean isApplet = false;
 
     public void init() {
@@ -83,6 +84,8 @@ public class Game extends Canvas implements Runnable {
             Packet00Login loginPacket = new Packet00Login(player.getUsername(), player.x, player.y);
             if (socketServer != null) {
                 socketServer.addConnection((PlayerMP) player, loginPacket);
+                Sound.scream.loop();
+                
             }
             loginPacket.writeData(socketClient);
         }
@@ -93,9 +96,11 @@ public class Game extends Canvas implements Runnable {
 
         thread = new Thread(this, NAME + "_main");
         thread.start();
+        
         if (!isApplet) {
             if (JOptionPane.showConfirmDialog(this, "Do you want to run the server") == 0) {
                 socketServer = new GameServer(this);
+                
                 socketServer.start();
             }
 

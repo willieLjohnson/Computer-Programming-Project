@@ -2,7 +2,7 @@ package ca.johnson.game.gfx;
 
 public class Colours {
 
-	// First # Background ; Second # is the actual color; Third # is pattern; Last #________
+	// First = Black ; Second = Gray; Third = Light Gray; Last = White
     public static int get(int colour1, int colour2, int colour3, int colour4) {
         return (get(colour4) << 24) + (get(colour3) << 16) + (get(colour2) << 8) + get(colour1);
     }
