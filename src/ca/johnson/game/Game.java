@@ -84,7 +84,7 @@ public class Game extends Canvas implements Runnable {
             Packet00Login loginPacket = new Packet00Login(player.getUsername(), player.x, player.y);
             if (socketServer != null) {
                 socketServer.addConnection((PlayerMP) player, loginPacket);
-                Sound.scream.loop();
+//                Sound.scream.loop();
                 
             }
             loginPacket.writeData(socketClient);

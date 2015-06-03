@@ -9,8 +9,10 @@ import ca.johnson.game.gfx.Colours;
 import ca.johnson.game.gfx.DeathTimer;
 import ca.johnson.game.gfx.Font;
 import ca.johnson.game.gfx.HealthBar;
+import ca.johnson.game.gfx.Projectile;
 import ca.johnson.game.gfx.Punch;
 import ca.johnson.game.gfx.Screen;
+import ca.johnson.game.gfx.Sound;
 import ca.johnson.game.level.Level;
 import ca.johnson.game.net.packets.Packet02Move;
 
@@ -27,7 +29,9 @@ public class Player extends Mob {
 	String DeathMessage = "";
 	private boolean isPunching = false;
 	private int lastSwing;
-	private int damage = 30;
+	private int damage = 25;
+	public boolean strafe;
+	private boolean isShooting = false;
 
 	public Player(Level level, int x, int y, InputHandler input, String username) {
 		super(level, "Player", x, y, 1);
@@ -53,16 +57,28 @@ public class Player extends Mob {
 			if (input.right.isPressed()) {
 				xa += 1 * sprintSp;
 			}
+			if (input.strafe.isPressed()) {
+				strafe = true;
+			} else
+				strafe = false;
 
 			if (input.sprint.isPressed()) {
 				sprintSp = 2;
 			} else {
 				sprintSp = 1;
 			}
+			if (input.shoot.isPressed()  && (tickCount - lastSwing > 120)) {
+				damage = 99999;
+				lastSwing = tickCount;
+				isShooting = true;
+				Sound.swing.play();
+			}
 
-			if (input.swing.isPressed() && (tickCount - lastSwing > 150)) {
+			if (input.swing.isPressed() && (tickCount - lastSwing > 50)) {
+				damage = 25;
 				lastSwing = tickCount;
 				isPunching = true;
+				Sound.swing.play();
 				switch (this.movingDir) {
 				case 1: // down
 					Ellipse2D attackRngDown = new Ellipse2D.Double(x - 10, y,
@@ -91,7 +107,10 @@ public class Player extends Mob {
 
 		}
 		if (xa != 0 || ya != 0) {
-			move(xa, ya);
+			if (Sound.gravel_1.isActive() == false && isSwimming == false) {
+				Sound.gravel_1.play();
+			}
+			move(xa, ya, strafe);
 			isMoving = true;
 
 			Packet02Move packet = new Packet02Move(this.getUsername(), this.x,
@@ -129,23 +148,19 @@ public class Player extends Mob {
 			int xOffset = x - modifier / 2;
 			int yOffset = y - modifier / 2 - 4;
 			if (isPunching) {
-				switch (this.movingDir) {
-				case 0: //up
-					Thread up = new Thread(new Punch(screen, xOffset, yOffset, lastSwing, this, this.movingDir));
-					up.start();
-					isPunching = false;
-					break;
-				case 1: //down
-					break;
-				case 2: //lefts
-					break;
-				case 3: //right
-					Thread right = new Thread(new Punch(screen, xOffset, yOffset, lastSwing, this, this.movingDir));
-					right.start();
-					isPunching = false;
-					break;
-				}
+
+				new Thread(new Punch(screen, xOffset, yOffset, lastSwing, this,
+						this.movingDir)).start();
+
+				isPunching = false;
+
 			}
+			if (isShooting) {
+				new Thread(new Projectile(screen, this, 8, tickCount,
+						this.movingDir)).start();
+				isShooting = false;
+			}
+
 			if (isSwimming) {
 				int waterColour = 0;
 				yOffset += 4;
@@ -178,7 +193,7 @@ public class Player extends Mob {
 						yOffset + modifier, (xTile + 1) + (yTile + 1) * 32,
 						colour, flipBottom, scale);
 			}
-			
+
 			if (username != null) {
 				Font.render(username, screen, xOffset
 						- ((username.length() - 1) / 2 * 8), yOffset - 10,
@@ -223,11 +238,12 @@ public class Player extends Mob {
 		return this.username;
 	}
 
-	private void checkCollision(Ellipse2D blade) {
+	public void checkCollision(Ellipse2D blade) {
 		for (Player p : Game.players) {
 			Point2D player = new Point2D.Double(p.x, p.y - 10);
 			if (blade.contains(player)) {
-				p.health -= damage ;
+				Sound.punch.play();
+				p.health -= damage;
 				System.out.println(p.health);
 				if (p.health <= 0) {
 					Thread respawning = new Thread(new DeathTimer(p.username,

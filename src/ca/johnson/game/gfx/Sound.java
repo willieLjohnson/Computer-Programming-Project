@@ -6,9 +6,10 @@ public class Sound {
 	private Clip clip;
 	
 	// Change file name to match yours, of course
-	public static Sound mainGameMusic = new Sound("/sounds/sound.wav");
-	public static Sound scream = new Sound("/sounds/death.wav");
-//	public static Sound sound3 = new Sound("[[[[[/ file directory  ]]]]]]");
+//	public static Sound mainGameMusic = new Sound("/sounds/sound.wav");
+	public static Sound punch = new Sound("/sounds/punch.wav");
+	public static Sound swing = new Sound("/sounds/woosh.wav");
+	public static Sound gravel_1 = new Sound("/sounds/walking_gravel_2.wav");
 	
 	public Sound (String fileName) {
 		try {

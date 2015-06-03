@@ -1,5 +1,6 @@
 package ca.johnson.game.entities;
 
+import ca.johnson.game.gfx.Sound;
 import ca.johnson.game.level.Level;
 import ca.johnson.game.level.tiles.Tile;
 
@@ -22,22 +23,24 @@ public abstract class Mob extends Entity {
 		this.speed = speed;
 	}
 
-	public void move(int xa, int ya) {
+	public void move(int xa, int ya, boolean strafe) {
+		
 		if (xa != 0 && ya != 0) {
-			move(xa, 0);
-			move(0, ya);
+			
+			move(xa, 0, strafe);
+			move(0, ya, strafe);
 			numSteps--;
 			return;
 		}
 		numSteps++;
 		if (!hasCollided(xa, ya)) {
-			if (ya < 0)
+			if (ya < 0  && strafe == false)
 				movingDir = 0;
-			if (ya > 0)
+			if (ya > 0  && strafe == false)
 				movingDir = 1;
-			if (xa < 0)
+			if (xa < 0  && strafe == false)
 				movingDir = 2;
-			if (xa > 0)
+			if (xa > 0  && strafe == false)
 				movingDir = 3;
 			x += xa * speed;
 			y += ya * speed;

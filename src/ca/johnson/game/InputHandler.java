@@ -31,8 +31,10 @@ public class InputHandler implements KeyListener {
     public Key down = new Key();
     public Key left = new Key();
     public Key right = new Key();
+    public Key strafe = new Key();
     public Key sprint = new Key();
 	public Key swing = new Key();
+	public Key shoot= new Key();
 
     public void keyPressed(KeyEvent e) {
         toggleKey(e.getKeyCode(), true);
@@ -59,10 +61,16 @@ public class InputHandler implements KeyListener {
             right.toggle(isPressed);
         }
         if (keyCode == KeyEvent.VK_SHIFT) {
-            sprint.toggle(isPressed);
+            strafe.toggle(isPressed);
         }
-        if (keyCode == KeyEvent.VK_F) {
+        if (keyCode == KeyEvent.VK_ALT) {
+        	sprint.toggle(isPressed);
+        }
+        if (keyCode == KeyEvent.VK_K) {
             swing.toggle(isPressed);
+        }
+        if (keyCode == KeyEvent.VK_J) {
+            shoot.toggle(isPressed);
         }
     }
 }
