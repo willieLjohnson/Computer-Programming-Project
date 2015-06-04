@@ -2,6 +2,7 @@ package ca.johnson.game.entities;
 
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Point2D;
+import java.util.Random;
 
 import ca.johnson.game.Game;
 import ca.johnson.game.InputHandler;
@@ -32,6 +33,14 @@ public class Player extends Mob {
 	private int damage = 25;
 	public boolean strafe;
 	private boolean isShooting = false;
+	private boolean isSprinting;
+	
+	// Sounds
+	private Sound run = Sound.running_grass;
+	private Sound walk = Sound.walking_grass;
+	private Sound punch = Sound.punch;
+	private Sound swing = Sound.swing;
+	
 
 	public Player(Level level, int x, int y, InputHandler input, String username) {
 		super(level, "Player", x, y, 1);
@@ -64,21 +73,23 @@ public class Player extends Mob {
 
 			if (input.sprint.isPressed()) {
 				sprintSp = 2;
+				isSprinting = true;
 			} else {
+				isSprinting = false;
 				sprintSp = 1;
 			}
 			if (input.shoot.isPressed()  && (tickCount - lastSwing > 120)) {
 				damage = 99999;
 				lastSwing = tickCount;
 				isShooting = true;
-				Sound.swing.play();
+				swing.play(0);
 			}
 
 			if (input.swing.isPressed() && (tickCount - lastSwing > 50)) {
 				damage = 25;
 				lastSwing = tickCount;
 				isPunching = true;
-				Sound.swing.play();
+				swing.play(0);
 				switch (this.movingDir) {
 				case 1: // down
 					Ellipse2D attackRngDown = new Ellipse2D.Double(x - 10, y,
@@ -107,8 +118,11 @@ public class Player extends Mob {
 
 		}
 		if (xa != 0 || ya != 0) {
-			if (Sound.gravel_1.isActive() == false && isSwimming == false) {
-				Sound.gravel_1.play();
+			if (walk.isActive() == false && isSwimming == false && isSprinting == false) {
+				walk.play(new Random().nextInt(walk.getSize()));
+			} else if (run.isActive() == false && isSwimming == false && isSprinting == true) {
+				if(walk.isActive() == true) {walk.stop();}
+				run.play(new Random().nextInt(run.getSize()));
 			}
 			move(xa, ya, strafe);
 			isMoving = true;
@@ -119,6 +133,8 @@ public class Player extends Mob {
 			packet.writeData(Game.game.socketClient);
 		} else {
 			isMoving = false;
+			if(walk.isActive() == true) {walk.stop();}
+			if(run.isActive() == true) {run.stop();}
 		}
 		if (level.getTile(this.x >> 3, this.y >> 3).getId() == 3) {
 			isSwimming = true;
@@ -162,6 +178,8 @@ public class Player extends Mob {
 			}
 
 			if (isSwimming) {
+				if(walk.isActive() == true) {walk.stop();}
+				if(run.isActive() == true) {run.stop();}
 				int waterColour = 0;
 				yOffset += 4;
 				if (tickCount % 60 < 15) {
@@ -242,7 +260,7 @@ public class Player extends Mob {
 		for (Player p : Game.players) {
 			Point2D player = new Point2D.Double(p.x, p.y - 10);
 			if (blade.contains(player)) {
-				Sound.punch.play();
+				punch.play(0);
 				p.health -= damage;
 				System.out.println(p.health);
 				if (p.health <= 0) {

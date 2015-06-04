@@ -9,7 +9,8 @@ public class Sound {
 //	public static Sound mainGameMusic = new Sound("/sounds/sound.wav");
 	public static Sound punch = new Sound("/sounds/punch.wav");
 	public static Sound swing = new Sound("/sounds/woosh.wav");
-	public static Sound gravel_1 = new Sound("/sounds/walking_gravel_2.wav");
+	public static Sound walking_grass = new Sound("/sounds/walking_grass.wav");
+	public static Sound running_grass = new Sound("/sounds/running_grass.wav");
 	
 	public Sound (String fileName) {
 		try {
@@ -21,14 +22,14 @@ public class Sound {
 		}
 	}
 
-	public void play() {
+	public void play(final int pos) {
 		try {
 			if (clip != null) {
 				new Thread() {
 					public void run() {
 						synchronized (clip) {
 							clip.stop();
-							clip.setFramePosition(0);
+							clip.setFramePosition(pos);
 							clip.start();
 						}
 					}
@@ -42,6 +43,9 @@ public class Sound {
 	public void stop(){
 		if(clip == null) return;
 		clip.stop();
+	}
+	public int getSize() {
+		return clip.getFrameLength();
 	}
 	
 	public void loop() {
